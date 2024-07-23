@@ -3,11 +3,23 @@ import { connection } from "./database.js";
 const app = express();
 app.use(express.json());
 
-app.post("/products", async (req,res)=>{
-    await connection.execute(
-        "INSERT INTO products (name,price) VALUES (?,?)",[req.body.name, req.body.price]
-    );
-    res.send("product berhasil ditambah");
+app.post("/products", async (req,res)=> {
+
+    try {
+        await connection.execute(
+            "INSERT INTO products (id,name,price) VALUES (?,?,?)", [req.body.id, req.body.name, req.body.price]
+        );
+        res.send("product berhasil ditambah");
+    } catch (error) {
+        console.log(error)
+        res.send("Id Tidak Boleh Sama");
+    }
+})
+
+app.get("/products/getbyid/:id", async (req, res) => {
+
+    const result= await connection.query("SELECT * from products where id=?",[req.params.id]);
+    res.json(result)
 })
 
 app.put("/products/:id", async(req,res)=>{
@@ -78,7 +90,7 @@ app.delete("/products/:id", async (req,res)=>{
 
 // // delete by id
 // app.delete("/deleteById/:id",(req,res)=>{
-    
+
 //     const dataIndex=datas.findIndex((data)=>data.id == req.params.id)
 //     if(dataIndex === -1){
 //         res.send("data tidak ditemukan");
