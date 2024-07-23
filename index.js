@@ -3,44 +3,50 @@ import { connection } from "./database.js";
 const app = express();
 app.use(express.json());
 
-app.post("/products", async (req,res)=> {
-
-    try {
-        await connection.execute(
-            "INSERT INTO products (id,name,price) VALUES (?,?,?)", [req.body.id, req.body.name, req.body.price]
-        );
-        res.send("product berhasil ditambah");
-    } catch (error) {
-        console.log(error)
-        res.send("Id Tidak Boleh Sama");
-    }
-})
+app.post("/products", async (req, res) => {
+  try {
+    await connection.execute(
+      "INSERT INTO products (id,name,price) VALUES (?,?,?)",
+      [req.body.id, req.body.name, req.body.price]
+    );
+    res.send("product berhasil ditambah");
+  } catch (error) {
+    console.log(error);
+    res.send("Id Tidak Boleh Sama");
+  }
+});
 
 app.get("/products/getbyid/:id", async (req, res) => {
+  const result = await connection.query("SELECT * from products where id=?", [
+    req.params.id,
+  ]);
+  res.json(result);
+});
 
-    const result= await connection.query("SELECT * from products where id=?",[req.params.id]);
-    res.json(result)
-})
+app.put("/products/:id", async (req, res) => {
+  await connection.execute("UPDATE products set name=?, price=? WHERE id=?", [
+    req.body.name,
+    req.body.price,
+    req.params.id,
+  ]);
+  res.send("Product berhasil di update");
+});
 
-app.put("/products/:id", async(req,res)=>{
-    await connection.execute(
-        "UPDATE products set name=?, price=? WHERE id=?",[req.body.name, req.body.price, req.params.id]
-    );
-    res.send("Product berhasil di update");
-})
+app.get("/products", async (req, res) => {
+  const result = await connection.query("SELECT * from products");
+  res.json(result);
+});
 
-app.get("/products", async(req,res)=>{
-    const result= await connection.query("SELECT * from products");
-    res.json(result);
-})
-
-app.delete("/products/:id", async (req,res)=>{
-    await connection.execute(
-        "DELETE from products WHERE id=?",[req.params.id]
-
-    )
-    res.send("PRODUCT BERHASIL DIHAPUS")
-})
+app.delete("/products/:id", async (req, res) => {
+  try {
+    await connection.execute("DELETE from products WHERE id=?", [
+      req.params.id,
+    ]);
+    res.send("PRODUCT BERHASIL DIHAPUS");
+  } catch (error) {
+    res.send("Id tidak dapat ditemukan");
+  }
+});
 // TANPA BASIS DATA
 // let datas=[];
 
@@ -99,6 +105,5 @@ app.delete("/products/:id", async (req,res)=>{
 //     res.send("data berhasil dihapus")
 // })
 
-
 // menjalankan server
-app.listen(3000, ()=> console.log("server berjalan"));
+app.listen(3000, () => console.log("server berjalan"));
