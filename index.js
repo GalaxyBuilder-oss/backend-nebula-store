@@ -16,11 +16,18 @@ app.post("/products", async (req, res) => {
   }
 });
 
-app.get("/products/getbyid/:id", async (req, res) => {
-  const result = await connection.query("SELECT * from products where id=?", [
-    req.params.id,
-  ]);
-  res.json(result);
+// Get By Id
+app.get("/products/:id", async (req, res) => {
+  try {
+    const result = await connection.query(
+      "SELECT * from products where id=?",
+      [req.params.id]
+    );
+    if (result.length == 0) res.status(404).send("Id Tidak Ditemukan");
+    res.json(result);
+  } catch (error) {
+    // res.status(404).send("Id Tidak Ditemukan");
+  }
 });
 
 app.put("/products/:id", async (req, res) => {
